@@ -39,7 +39,7 @@ install-binary: ogive
 install-doc:
 	@sed "s/__VERSION__/${VERSION}/g" doc/ogive.1.templ > doc/ogive.1 && \
 		install -g 0 -o 0 -m 0644 doc/ogive.1 /usr/local/man/man1/ && \
-		gzip -f /usr/local/man/man1/ogive.1
+		gzip -f /usr/local/man/man1/ogive.1 && rm -f doc/ogive.1
 
 format:
 	@go fmt ./...

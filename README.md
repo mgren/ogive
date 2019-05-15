@@ -22,7 +22,7 @@ This project requires go 1.11.0 or newer. Assuming the go binary is available in
 
 ```sh
 $ go get -d github.com/mgren/ogive
-$ cd cd $GOPATH/src/github.com/mgren/ogive
+$ cd $GOPATH/src/github.com/mgren/ogive
 $ make
 $ make install
 ```
@@ -96,9 +96,9 @@ $ bash securely-retrieve-password-and-write-to-stdout.sh | ogive put example.dat
 #### Restore All Archives
 ```sh
 $ bash securely-retrieve-password-and-write-to-stdout.sh | ogive list | \
-awk 'NR>2 && $4 == "DEEPS" {print $5}' | while read id;
-do bash securely-retrieve-password-and-write-to-stdout.sh | ogive restore $id;
-done
+> awk 'NR>2 && $4 == "DEEPS" {print $5}' | while read id;
+> do bash securely-retrieve-password-and-write-to-stdout.sh | ogive restore $id;
+> done
 ```
 
 ## Usage
@@ -113,8 +113,8 @@ Global flags available for any subcommand:
 ### get
 Download and decrypt file, saving it under its original filename.
 
-```
-ogive get <source_file> <destination_directory> [flags]
+```sh
+$ ogive get <source_file> <destination_directory> [flags]
 ```
 
 ##### flags
@@ -125,8 +125,8 @@ ogive get <source_file> <destination_directory> [flags]
 ### head
 Head a specific Ogive file on S3 and retrieve its current archival status. 
 
-```
-ogive head <storage_id> [flags]
+```sh
+$ ogive head <storage_id> [flags]
 ```
 
 Following exit codes and file statuses are possible for this command: 
@@ -147,8 +147,8 @@ Following exit codes and file statuses are possible for this command:
 ### init
 Set up an Ogive profile, including generating the master key and providing the S3 bucket location.
 
-```
-ogive init [flags]
+```sh
+$ ogive init [flags]
 ```
 
 ##### flags
@@ -159,22 +159,22 @@ ogive init [flags]
 ### list
 Lists all Ogive archives in an S3 bucket. Lists entire bucket and HEADs each file to retrieve metadata.
 
-```
-ogive list [flags]
+```sh
+$ ogive list [flags]
 ```
 
 ### put
 Encrypt and upload file to S3 Glacier Deep Archive.
 
-```
-ogive put <source_file> [flags]
+```sh
+$ ogive put <source_file> [flags]
 ```
 
 ### restore
 Initiate file recovery from Deep Archive. Bulk Restore is used. Use _head_ command to verify when the file becomes ready for download.
 
-```
-ogive restore <storage_id> [flags]
+```sh
+$ ogive restore <storage_id> [flags]
 ```
 
 ##### flags
