@@ -1,16 +1,12 @@
 <p align="center">
-  <picture>
-    <source srcset="https://github.com/mgren/ogive/raw/master/logo/logo.webp" type="image/webp">
-    <source srcset="https://github.com/mgren/ogive/raw/master/logo/logo.png" type="image/png"> 
-    <img src="https://github.com/mgren/ogive/raw/master/logo/logo.png">
-  </picture>
+  <img src="https://github.com/mgren/ogive/raw/master/logo/logo.png" alt="ogive logo">
   <br>
   Secure backups with AWS S3 Glacier Deep Archive
   <br>
   <br>
   <p align="center">
     <a href="https://goreportcard.com/report/github.com/mgren/ogive">
-      <img src="https://goreportcard.com/badge/github.com/mgren/ogive">
+      <img src="https://goreportcard.com/badge/github.com/mgren/ogive" alt="goreportcard badge">
     </a>
   </p>
 </p>
@@ -194,7 +190,7 @@ When running the _get_ or _put_ commands, ogive will report an approximate progr
 Since each _put_ generates an unique nonce and derives an unique name, the probability of name collision in storage is basically zero. This allows to _put_ the same file multiple times at different points in time to create multiple backups.
 
 #### About the profile file
-Since the profile file stores the master key, its loss or corruption renders all backups created with it unrecoverable. A copy of the profile file on a separate medium is essential. An additional, physical backup such as [PaperBack](http://ollydbg.de/Paperbak/) is suggested.
+Since the profile file stores the master key, its loss or corruption renders all backups created with it unrecoverable. A copy of the profile file on a separate medium is essential. An additional, physical backup of the profile file such as [PaperBack](http://ollydbg.de/Paperbak/) is suggested.
 
 #### Broken Downloads/uploads
 Currently ogive does not support any form of download/upload resumption. One file operation must complete in one run. This is unlikely to change, at least until [sio supports WriteAt and ReadAt](https://github.com/minio/sio/issues/13). With that in place, the upload/download code would need to be rewritten to replace s3manager with manual control of part download/upload in order to ensue all operations are aligned to the underlying cipher block size.

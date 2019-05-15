@@ -104,7 +104,7 @@ multiple backups.
 .SS About the profile file
 Since the profile file stores the master key, its loss or corruption renders
 all backups created with it unrecoverable. A copy of the profile file on a separate
-medium is essential. An additional, physical backup such as PaperBack
+medium is essential. An additional, physical backup of the profile file such as PaperBack
 .RB < http://ollydbg.de/Paperbak/ >
 is suggested.
 .SS Broken Downloads/uploads
@@ -135,7 +135,7 @@ ogive get <storage_id> /directory/to/save-in
 .nf
 .RS
 ogive put /dev/sdf
-ogive restore <storage_id> /dev # --output=sdg to write to sdg instead of sdf
+ogive get <storage_id> /dev # --output=sdg to write to sdg instead of sdf
 .RE
 .fi
 .SS Supplying a Password From Stdin
