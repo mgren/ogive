@@ -54,7 +54,7 @@ var putCmd = &cobra.Command{
 			Bucket:      &inner.BucketName,
 			Key:         &obj.Name,
 			ContentType: aws.String("application/x-ogive"),
-			//StorageClass: aws.String("DEEP_ARCHIVE"),
+			StorageClass: aws.String("DEEP_ARCHIVE"),
 			Metadata: map[string]*string{
 				"Nonce": aws.String(fmt.Sprintf("%x", obj.Nonce)),
 			},
