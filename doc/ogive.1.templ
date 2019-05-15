@@ -1,0 +1,179 @@
+.TH ogive 1 "12 May 2019" "version __VERSION__"
+.
+.SH NAME
+ogive - secure backups with AWS S3 Glacier Deep Archive
+.
+.SH SYNOPSIS
+.B ogive
+.I SUBCOMMAND
+.I [FLAGS]
+.
+.SH DESCRIPTION
+.B ogive
+is a simple commandline tool for storing and retrieving cryptographically secure
+backups from AWS S3 Glacier Deep Archive.
+.
+.SH OPTIONS
+.SS General Flags
+.TP
+.BR \-h ", " \-\^\-help\fP[=false]
+Help for
+.B ogive\fP.
+This flag is also available on all subcommands and prints subcommand-specific help.
+.TP
+.BR \-p ", " \-\^\-profile\fP[="$HOME/.ogive"]
+Location of the
+.B ogive
+profile file to be used with subcommands.
+.
+.SS Subcommands
+.TP
+.B get \fISOURCE_FILE DESTINATION_DIRECTORY
+Can be used to download individual stored files. By default, files are saved in the
+.I DESTINATION_DIRECTORY
+under the orignial filename.
+.RS
+.TP
+.BR \-o ", " \-\^\-output\fP[=""]
+Override destination filename.
+.RE
+.TP
+.B head \fISTORAGE_ID
+Can be used to head a single file and check if its recovery has completed.
+Following exit codes and file statuses are possible:
+.TS
+l l.
+CODE	DESCRIPTION
+_
+\fI0\fP	file available for download,
+\fI1\fP	error occurred,
+\fI2\fP	file not available for download.
+.TE
+.TS
+l l.
+STATUS	DESCRIPTION
+_
+\fIDEEPS\fP	file is in DEEP_ARCHIVE state with no restore job pending,
+\fIRECOV\fP	file is currently being restored,
+\fIREADY\fP	file has been restored into STANDARD storage and is ready for downloading,
+\fI?????\fP	file state is unrecognized.
+.TE
+.TP
+.B init
+.RS
+Can be used to set up an ogive profile, including the cryptographic key,
+AWS credentials and S3 bucket location.
+.TP
+.BR \-r ", " \-\^\-reinit\fP[=false]
+Reinitialize an existing profile to change the profile password and/or AWS keys.
+Old profile is stored as "\fIORIGINAL_PROFILE\fP.bak".
+.RE
+.TP
+.B list
+.RS
+Lists all ogive archives in an S3 bucket.
+Lists entire bucket and HEADs each file to retrieve metadata.
+.RE
+.TP
+.B put \fISOURCE_FILE
+Encrypt and upload file to S3 Glacier Deep Archive.
+.TP
+.B restore \fISTORAGE_ID
+Initiate file recovery from Deep Archive. Bulk Restore is used.
+Use \fIhead\fP command to verify when the file becomes ready for download.
+.RS
+.TP
+.BR \-r ", " \-\^\-lifetime\fP[=1]
+Specifies the number of days to retain the restored object before returning it
+to Deep Archive.
+.RE
+.
+.SH NOTES
+.SS Progress Reporting
+When running the \fIget\fP or \fIput\fP commands, ogive will report an approximate
+progress. For file uploads this is highly inaccurate for objects smaller than 550 MiB.
+This is because aws-sdk-go lacks progress reporting in its s3manager,
+so this program relies on the amount of bytes read by the manager instead.
+Users should always wait for the program to exit gracefully instead of relying solely
+on the progress bar.
+.SS Multiple Backup Versions
+Since each \fIput\fP generates an unique nonce and derives an unique name,
+the probability of name collision in storage is basically zero. This allows to
+\fIput\fP the same file multiple times at different points in time to create
+multiple backups.
+.SS About the profile file
+Since the profile file stores the master key, its loss or corruption renders
+all backups created with it unrecoverable. A copy of the profile file on a separate
+medium is essential. An additional, physical backup such as PaperBack
+.RB < http://ollydbg.de/Paperbak/ >
+is suggested.
+.SS Broken Downloads/uploads
+Currently ogive does not support any form of download/upload resumption.
+One file operation must complete in one run. This is unlikely to change,
+at least until sio supports WriteAt and ReadAt
+.RB < https://github.com/minio/sio/issues/13 >
+With that in place, the upload/download code would need to be rewritten to replace
+s3manager with manual control of part download/upload in order to ensue all operations
+are aligned to the underlying cipher block size.
+.
+.SH EXAMPLE
+.SS Basic Example
+.nf
+.RS
+ogive init
+// enter profile information
+ogive put example.dat
+ogive list
+// find example.dat on the list to determine its storage_id
+ogive restore <storage_id>
+ogive head <storage_id>
+// Bulk Restore usually completes within 48 hours
+ogive get <storage_id> /directory/to/save-in
+.RE
+.fi
+.SS Writing To/From a Block Device
+.nf
+.RS
+ogive put /dev/sdf
+ogive restore <storage_id> /dev # --output=sdg to write to sdg instead of sdf
+.RE
+.fi
+.SS Supplying a Password From Stdin
+.nf
+.RS
+bash securely-retrieve-password-and-write-to-stdout.sh | ogive put example.dat
+.SS Restore All Archives
+.nf
+.RS
+bash securely-retrieve-password-and-write-to-stdout.sh | ogive list | \
+awk 'NR>2 && $4 == "DEEPS" {print $5}' | while read id;
+do bash securely-retrieve-password-and-write-to-stdout.sh | ogive restore $id;
+done
+.RE
+.fi
+.
+.SH KNOWN ISSUES
+.TP
+.B panic: memguard.memcall.Lock() when running ogive init
+There seems to be a rare race condition in the Go compiler that makes
+the resulting binary panic each time when creating or reinitializng a profile file.
+Recompiling the program and replacing its binary fixes the issue.
+.
+.SH COPYRIGHT
+This is free and unencumbered software released into the public domain.
+.PP
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+.PP
+For more information, please refer to
+.RB < http://unlicense.org/ >
+.
+.SH BUGS
+.SS "Reporting Bugs"
+Please report any bugs or issues you might encounter at
+.RB < https://github.com/mgren/ogive/issues >.
